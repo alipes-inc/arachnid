@@ -44,13 +44,19 @@ class Crawler
      * @var array
      */
     protected $links;
+    /**
+     * Array of callbacks
+     * @var array
+     */
+    protected $inclusiveFilters = [];
 
     /**
      * Constructor
      * @param string $baseUrl
      * @param int    $maxDepth
      */
-    public function __construct($baseUrl, $maxDepth = 3)
+    public function __construct($baseUrl, $maxDepth = 3,
+        $inclusiveFilters = [])
     {
         $this->baseUrl = $baseUrl;
         $this->maxDepth = $maxDepth;
@@ -291,7 +297,7 @@ class Crawler
             }
         }
 
-        return true;
+        return $this->isIncludedUrl($uri);
     }
 
     /**
@@ -327,5 +333,20 @@ class Crawler
         } else {
             return $url;
         }
+    }
+
+    /**
+     * does the url pass any one of the inclusive filters, if any
+     * @param  string  $url normalized url
+     * @return boolean      
+     */
+    protected function isIncludedUrl($url)
+    {
+        if (empty($this->inclusiveFilters)) return true;
+        foreach ($this->inclusiveFilters as $f)
+        {
+            if ($f($url)) return true;
+        }
+        return false;
     }
 }
