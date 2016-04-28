@@ -1,9 +1,9 @@
 {
-    "name": "alipes-inc/arachnid",
+    "name": "codeguy/arachnid",
     "type": "library",
     "description": "A crawler to find all unique internal pages on a given website",
     "keywords": ["crawl","spider","search","scrape"],
-    "homepage": "http://github.com/alipes-inc/arachnid",
+    "homepage": "http://github.com/codeguy/arachnid",
     "license": "MIT",
     "authors": [
         {
@@ -13,9 +13,6 @@
         {
             "name": "Zeid Rashwani",
             "homepage": "http://zrashwani.com"
-        },
-        {
-            "name": "Nathan Lamont"
         }
     ],
     "require": {

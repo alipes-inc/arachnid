@@ -11,8 +11,6 @@ Josh Lockhart adapted the original blog post's code (with permission)
 for Composer and Packagist and updated the syntax to conform with
 the PSR-2 coding standard.
 
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/8ff1e4b2-d8c8-4465-b9ea-f5db69c3c2d0/mini.png)](https://insight.sensiolabs.com/projects/8ff1e4b2-d8c8-4465-b9ea-f5db69c3c2d0)
-
 ## How to Install
 
 You can install this library with [Composer][composer]. Drop this into your `composer.json`
@@ -55,7 +53,7 @@ All pull requests must adhere to the [PSR-2 standard][psr2].
 
 ## System Requirements
 
-* PHP 5.4.0+
+* PHP 5.3.0+
 
 ## Authors
 

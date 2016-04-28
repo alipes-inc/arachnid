@@ -61,7 +61,7 @@ class Crawler
      * Initiate the crawl
      * @param string $url
      */
-    public function traverse($url = null)
+    public function traverse($url = null, $callback = null)
     {
         if ($url === null) {
             $url = $this->baseUrl;
@@ -75,7 +75,7 @@ class Crawler
             );
         }
 
-        $this->traverseSingle($url, $this->maxDepth);
+        $this->traverseSingle($url, $this->maxDepth, $callback);
     }
 
     /**
@@ -92,7 +92,7 @@ class Crawler
      * @param string $url
      * @param int    $depth
      */
-    protected function traverseSingle($url, $depth)
+    protected function traverseSingle($url, $depth, $callback = null)
     {
         try {
             $client = $this->getScrapClient();
@@ -110,12 +110,16 @@ class Crawler
                     $this->extractTitleInfo($crawler, $hash);
 
                     $childLinks = array();
-                    if (isset($this->links[$hash]['external_link']) === true && $this->links[$hash]['external_link'] === false) {
+                    if (/*isset($this->links[$hash]['external_link']) === true && $this->links[$hash]['external_link'] === false*/
+                        !@$this->links[$hash]['external_link']) {
+                        if ($callback) {
+                            $callback($url, $crawler);
+                        }
                         $childLinks = $this->extractLinksInfo($crawler, $hash);
                     }
 
                     $this->links[$hash]['visited'] = true;
-                    $this->traverseChildren($childLinks, $depth - 1);
+                    $this->traverseChildren($childLinks, $depth - 1, $callback);
                 }
             }
         } catch (CurlException $e) {
@@ -154,7 +158,7 @@ class Crawler
      * @param array $childLinks
      * @param int   $depth
      */
-    protected function traverseChildren($childLinks, $depth)
+    protected function traverseChildren($childLinks, $depth, $callback)
     {
         if ($depth === 0) {
             return;
@@ -178,8 +182,9 @@ class Crawler
                 $this->links[$hash]['visited'] = false;
             }
 
-            if (empty($url) === false && $this->links[$hash]['visited'] === false && isset($this->links[$hash]['dont_visit']) === false) {
-                $this->traverseSingle($this->normalizeLink($childLinks[$url]['absolute_url']), $depth);
+            if (empty($url) === false && $this->links[$hash]['visited'] === false && isset($this->links[$hash]['dont_visit']) === false
+                && !@$this->links[$hash]['external_link']) {
+                $this->traverseSingle($this->normalizeLink($childLinks[$url]['absolute_url']), $depth, $callback);
             }
         }
     }
@@ -206,12 +211,12 @@ class Crawler
                 if ($node_url_is_crawlable === true) {
                     // Ensure URL is formatted as absolute
 
-                    if (preg_match("@^http(s)?@", $node_url) !== 1) {
+                    if (preg_match("@^http(s)?@", $node_url) == false) {
                         if (strpos($node_url, '/') === 0) {
                             $parsed_url = parse_url($this->baseUrl);
                             $childLinks[$hash]['absolute_url'] = $parsed_url['scheme'] . '://' . $parsed_url['host'] . $node_url;
                         } else {
-                            $childLinks[$hash]['absolute_url'] = substr($this->baseUrl, 0, strrpos( $this->baseUrl, '/')) . '/' . $node_url;
+                            $childLinks[$hash]['absolute_url'] = $this->baseUrl . $node_url;
                         }
                     } else {
                         $childLinks[$hash]['absolute_url'] = $node_url;
@@ -281,7 +286,7 @@ class Crawler
         );
 
         foreach ($stop_links as $ptrn) {
-            if (preg_match($ptrn, $uri) === 1) {
+            if (preg_match($ptrn, $uri) == true) {
                 return false;
             }
         }
@@ -297,10 +302,7 @@ class Crawler
     protected function checkIfExternal($url)
     {
         $base_url_trimmed = str_replace(array('http://', 'https://'), '', $this->baseUrl);
-
-        $base_url_trimmed = explode('/', $base_url_trimmed)[0];
-
-        return preg_match("@http(s)?\://$base_url_trimmed@", $url) !== 1;
+        return preg_match("@http(s)?\://$base_url_trimmed@", $url) == false;
     }
 
     /**
