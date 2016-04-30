@@ -61,6 +61,7 @@ class Crawler
         $this->baseUrl = $baseUrl;
         $this->maxDepth = $maxDepth;
         $this->links = array();
+        $this->inclusiveFilters = $inclusiveFilters;
     }
 
     /**
@@ -101,6 +102,7 @@ class Crawler
     protected function traverseSingle($url, $depth, $callback = null)
     {
         try {
+            print "FETCH $url\n";
             $client = $this->getScrapClient();
 
             $crawler = $client->request('GET', $url);
