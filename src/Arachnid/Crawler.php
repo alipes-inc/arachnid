@@ -102,7 +102,7 @@ class Crawler
     protected function traverseSingle($url, $depth, $callback = null)
     {
         try {
-            print "FETCH $url\n";
+            // print "FETCH $url\n";
             $client = $this->getScrapClient();
 
             $crawler = $client->request('GET', $url);
@@ -127,6 +127,8 @@ class Crawler
                     }
 
                     $this->links[$hash]['visited'] = true;
+                    // if (strpos($url, 'for-veterinarians-and-staff') !== false)
+                    //     print $depth . " > " . $url . "\n";
                     $this->traverseChildren($childLinks, $depth - 1, $callback);
                 }
             }
@@ -192,7 +194,18 @@ class Crawler
 
             if (empty($url) === false && $this->links[$hash]['visited'] === false && isset($this->links[$hash]['dont_visit']) === false
                 && !@$this->links[$hash]['external_link']) {
+                // if (strpos($url, 'for-veterinarians-and-staff') !== false)
+                // {
+                //     print "!!! single URL $url\n";
+                // }
+
                 $this->traverseSingle($this->normalizeLink($childLinks[$url]['absolute_url']), $depth, $callback);
+            } else {
+                // if (strpos($url, 'for-veterinarians-and-staff') !== false)
+                // {
+                //     // var_dump(@$this->links[$hash]);
+                //     print ">>> skipping URL $url\n";
+                // }
             }
         }
     }
@@ -211,6 +224,13 @@ class Crawler
             $node_url = $node->attr('href');
             $node_url_is_crawlable = $this->checkIfCrawlable($node_url);
             $hash = $this->normalizeLink($node_url);
+                // if (strpos($node_url, 'for-veterinarians-and-staff') !== false)
+                // {
+                //     if (!$node_url_is_crawlable)
+                //         print ">>> FAIL $hash\n";
+                //     else {
+                //     }
+                // }
 
             if (isset($this->links[$hash]) === false) {
                 $childLinks[$hash]['original_urls'][$node_url] = $node_url;
@@ -240,7 +260,11 @@ class Crawler
                     $childLinks[$hash]['dont_visit'] = true;
                     $childLinks[$hash]['external_link'] = false;
                 }
+                if (strpos($node_url, 'for-veterinarians-and-staff') !== false) {
+                    // var_dump($childLinks[$hash]);
+                }
             }
+
         });
 
         // Avoid cyclic loops with pages that link to themselves
